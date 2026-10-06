@@ -161,3 +161,9 @@ _, _, invalid = Open3.capture3(HELM,'template','oci',"#{ROOT}/clusters/managemen
 check(!invalid.success?, 'Unprepared OCI activation must fail')
 _, _, invalid = Open3.capture3(HELM,'template','wrong-domain',"#{ROOT}/charts/cert-manager-istio-csr",'-f',"#{oci}/cluster.yaml")
 check(!invalid.success?, 'Management signer defaults must fail for an OCI cluster without domain overrides')
+
+longhorn = rendered.fetch('longhorn')
+check(longhorn.none? { |o| o['kind']=='Job' && o.dig('metadata','name')=='longhorn-pre-upgrade' }, 'Argo installation must not wait on a pre-upgrade job before SA/RBAC exists')
+check(longhorn.any? { |o| o['kind']=='ServiceAccount' && o.dig('metadata','name')=='longhorn-service-account' }, 'Longhorn must install its service account normally')
+checker = YAML.safe_load(File.read("#{ROOT}/charts/longhorn/values.yaml")).dig('longhorn','preUpgradeChecker')
+check(checker['jobEnabled']==false && checker['upgradeVersionCheck']==true, 'Disable only the GitOps hook, keep upgrade safety enabled')

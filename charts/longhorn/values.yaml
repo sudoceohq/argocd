@@ -1,5 +1,9 @@
 ---
 longhorn:
+  # Helm pre-upgrade becomes Argo PreSync before initial SA/RBAC installation.
+  preUpgradeChecker:
+    jobEnabled: false
+    upgradeVersionCheck: true
   persistence:
     defaultClass: true
     defaultClassReplicaCount: 3
