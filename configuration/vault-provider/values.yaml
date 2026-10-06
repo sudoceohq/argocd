@@ -1,0 +1,22 @@
+---
+cluster:
+  id: management
+  role: management
+  enabled: true
+  prepared: true
+  server: https://kubernetes.default.svc
+  operatorServer: https://10.0.10.83:6443
+  context: ''
+  trustDomain: mgmt.thriftystack.internal
+  vaultAddress: https://vault.vault.svc:8200
+  authMount: kubernetes-management
+  pkiMount: pki-management
+  issuerCommonName: ThriftyStack Management Issuing CA 2026
+  issuerGeneration: management-2026
+  providerConfig: management-vault
+  manageRoot: true
+  localReviewer: true
+  signerRole: istio-signer
+  vaultTLSName: vault.vault.svc
+protectedCaNames: [workload-root, management-2026, oci-2026]
+protectedMountNames: [workload-root, management-issuing, oci-issuing]

@@ -1,0 +1,38 @@
+---
+istiod:
+  autoscaleEnabled: false
+  replicaCount: 2
+  env:
+    ENABLE_CA_SERVER: 'false'
+  global:
+    caAddress: cert-manager-istio-csr.cert-manager.svc:443
+    pilotCertProvider: istiod
+    multiCluster:
+      clusterName: management
+    proxy:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 256Mi
+  meshConfig:
+    trustDomain: mgmt.thriftystack.internal
+    trustDomainAliases: []
+    defaultConfig:
+      holdApplicationUntilProxyStarts: true
+      proxyMetadata:
+        SECRET_TTL: 1h
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 768Mi
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchLabels:
+            app: istiod

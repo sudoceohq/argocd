@@ -1,0 +1,15 @@
+# INACTIVE EXAMPLE. mTLS authenticates identities; authorization is a separate policy.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: server-only-from-client
+  namespace: mesh-test
+spec:
+  selector:
+    matchLabels:
+      app: server
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals: ['mgmt.thriftystack.internal/ns/mesh-test/sa/client']

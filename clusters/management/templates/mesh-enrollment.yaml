@@ -1,0 +1,39 @@
+{{- if and .Values.cluster.enabled .Values.stages.enrollment }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ if ne .Values.cluster.id "management" }}{{ .Values.cluster.id }}-{{ end }}mesh-enrollment
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '70'
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  project: {{ .Values.cluster.id }}
+  source:
+    repoURL: https://github.com/sudoceohq/argocd.git
+    targetRevision: main
+    path: configuration/mesh-enrollment
+    helm:
+      releaseName: mesh-enrollment
+      valueFiles:
+      - "../../clusters/{{ .Values.cluster.id }}/cluster.yaml"
+  destination:
+    server: {{ .Values.cluster.server | quote }}
+    namespace: mesh-test
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: disabled
+{{- end }}

@@ -1,0 +1,7 @@
+---
+cert-manager-istio-csr:
+  app:
+    tls:
+      trustDomain: oci.thriftystack.internal
+    server:
+      clusterID: oci

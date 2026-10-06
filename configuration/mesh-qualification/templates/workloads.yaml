@@ -1,0 +1,128 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh-test
+  labels:
+    istio-injection: enabled
+    thriftystack.io/mesh: enabled
+    pod-security.kubernetes.io/enforce: privileged
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: server
+  namespace: mesh-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  namespace: mesh-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      serviceAccountName: server
+      containers:
+      - name: server
+        image: docker.io/library/nginx:1.28.0-alpine
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: client
+  namespace: mesh-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  namespace: mesh-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      serviceAccountName: client
+      containers:
+      - name: client
+        image: docker.io/curlimages/curl:8.16.0
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        command:
+        - sh
+        - "-c"
+        - sleep 2147483647
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: plaintext
+  namespace: mesh-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plaintext
+  namespace: mesh-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plaintext
+  template:
+    metadata:
+      labels:
+        app: plaintext
+      annotations:
+        sidecar.istio.io/inject: 'false'
+    spec:
+      serviceAccountName: plaintext
+      containers:
+      - name: plaintext
+        image: docker.io/curlimages/curl:8.16.0
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            memory: 64Mi
+        command:
+        - sh
+        - "-c"
+        - sleep 2147483647
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  namespace: mesh-test
+spec:
+  selector:
+    app: server
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80

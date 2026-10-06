@@ -1,0 +1,8 @@
+---
+apiVersion: v2
+name: thrifty-istiod
+version: 1.0.0
+dependencies:
+- name: istiod
+  version: 1.30.5
+  repository: https://istio-release.storage.googleapis.com/charts

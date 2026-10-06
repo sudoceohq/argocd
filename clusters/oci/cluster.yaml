@@ -1,0 +1,20 @@
+---
+cluster:
+  id: oci
+  role: workload
+  enabled: false
+  prepared: false
+  server: ''
+  operatorServer: ''
+  context: ''
+  trustDomain: oci.thriftystack.internal
+  vaultAddress: ''
+  authMount: kubernetes-oci
+  pkiMount: pki-oci
+  issuerCommonName: ThriftyStack OCI Issuing CA 2026
+  issuerGeneration: oci-2026
+  providerConfig: management-vault
+  manageRoot: false
+  localReviewer: false
+  signerRole: oci-istio-signer
+  vaultTLSName: vault.vault.svc

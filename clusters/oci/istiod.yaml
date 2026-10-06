@@ -1,0 +1,8 @@
+---
+istiod:
+  global:
+    multiCluster:
+      clusterName: oci
+  meshConfig:
+    trustDomain: oci.thriftystack.internal
+    trustDomainAliases: []

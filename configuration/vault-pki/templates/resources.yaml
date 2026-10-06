@@ -1,0 +1,249 @@
+{{ if .Values.cluster.manageRoot }}
+
+apiVersion: vault.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: {{ .Values.cluster.providerConfig }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-40"
+spec:
+  address: {{ .Values.cluster.vaultAddress }}
+  credentials:
+    source: Kubernetes
+  mountPath: {{ .Values.cluster.authMount }}
+  role: crossplane-pki
+  skip_tls_verify: false
+  tls_server_name: {{ .Values.cluster.vaultTLSName }}
+  max_lease_ttl_seconds: 600
+
+{{ end }}
+---
+{{ if .Values.cluster.manageRoot }}
+
+apiVersion: vault.vault.upbound.io/v1alpha1
+kind: Mount
+metadata:
+  name: workload-root
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  forProvider:
+    path: pki-root
+    type: pki
+    description: Internal workload root; no leaf issuance
+    defaultLeaseTtlSeconds: 86400
+    maxLeaseTtlSeconds: 315360000
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+{{ end }}
+
+---
+
+apiVersion: vault.vault.upbound.io/v1alpha1
+kind: Mount
+metadata:
+  name: {{ .Values.cluster.id }}-issuing
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  forProvider:
+    path: {{ .Values.cluster.pkiMount }}
+    type: pki
+    description: Management mesh intermediate; separate from control-plane PKI
+    defaultLeaseTtlSeconds: 3600
+    maxLeaseTtlSeconds: 31536000
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+
+---
+{{ if .Values.cluster.manageRoot }}
+
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendRootCert
+metadata:
+  name: workload-root
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-20"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  forProvider:
+    backend: pki-root
+    type: internal
+    commonName: ThriftyStack Workload Root 2026
+    issuerName: root-2026
+    keyType: ec
+    keyBits: 384
+    ttl: '315360000'
+    maxPathLength: 1
+    permittedUriDomains:
+    - {{ .Values.cluster.trustDomain }}
+    - oci.thriftystack.internal
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+{{ end }}
+
+---
+
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendIntermediateCertRequest
+metadata:
+  name: {{ .Values.cluster.issuerGeneration }}
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-20"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  forProvider:
+    backend: {{ .Values.cluster.pkiMount }}
+    type: internal
+    commonName: {{ .Values.cluster.issuerCommonName | quote }}
+    keyType: ec
+    keyBits: 256
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+
+---
+{{ if .Values.cluster.localReviewer }}
+
+apiVersion: kubernetes.vault.upbound.io/v1alpha1
+kind: AuthBackendConfig
+metadata:
+  name: {{ .Values.cluster.id }}-auth
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-30"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  forProvider:
+    backend: {{ .Values.cluster.authMount }}
+    kubernetesHost: https://kubernetes.default.svc:443
+    disableLocalCaJwt: false
+    disableIssValidation: true
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+{{ end }}
+
+---
+
+apiVersion: vault.vault.upbound.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ .Values.cluster.signerRole }}
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  forProvider:
+    name: {{ .Values.cluster.signerRole }}
+    policy: |
+      path "{{ .Values.cluster.pkiMount }}/sign/istio" { capabilities = ["update"] }
+      path "{{ .Values.cluster.pkiMount }}/cert/ca" { capabilities = ["read"] }
+      path "{{ .Values.cluster.pkiMount }}/ca/pem" { capabilities = ["read"] }
+      path "auth/token/lookup-self" { capabilities = ["read"] }
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+
+---
+
+apiVersion: kubernetes.vault.upbound.io/v1alpha1
+kind: AuthBackendRole
+metadata:
+  name: {{ .Values.cluster.signerRole }}
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  forProvider:
+    backend: {{ .Values.cluster.authMount }}
+    roleName: {{ .Values.cluster.signerRole }}
+    boundServiceAccountNames:
+    - istio-vault-auth
+    boundServiceAccountNamespaces:
+    - istio-system
+    audience: vault://istio-system/vault-istio
+    tokenPolicies:
+    - {{ .Values.cluster.signerRole }}
+    tokenTtl: 300
+    tokenMaxTtl: 600
+    tokenNoDefaultPolicy: true
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}
+
+---
+
+apiVersion: pki.vault.upbound.io/v1alpha1
+kind: SecretBackendRole
+metadata:
+  name: {{ if ne .Values.cluster.id "management" }}{{ .Values.cluster.id }}-{{ end }}istio
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    argocd.argoproj.io/sync-wave: '0'
+spec:
+  deletionPolicy: Orphan
+  managementPolicies:
+  - Observe
+  - Create
+  - Update
+  forProvider:
+    backend: {{ .Values.cluster.pkiMount }}
+    name: istio
+    issuerRef: default
+    ttl: '3600'
+    maxTtl: '3600'
+    allowAnyName: false
+    allowLocalhost: false
+    allowIpSans: false
+    allowWildcardCertificates: false
+    allowSubdomains: false
+    allowBareDomains: true
+    allowedDomains:
+    - istiod.istio-system.svc
+    - istiod.istio-system.svc.cluster.local
+    - cert-manager-istio-csr.cert-manager.svc
+    allowedUriSans:
+    - spiffe://{{ .Values.cluster.trustDomain }}/ns/*/sa/*
+    requireCn: false
+    useCsrCommonName: false
+    useCsrSans: true
+    keyType: any
+    serverFlag: true
+    clientFlag: true
+    keyUsage:
+    - DigitalSignature
+    - KeyEncipherment
+    noStore: true
+  providerConfigRef:
+    name: {{ .Values.cluster.providerConfig }}

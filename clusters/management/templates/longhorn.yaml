@@ -1,0 +1,42 @@
+{{- if and (and .Values.cluster.enabled .Values.stages.foundation) (eq .Values.cluster.role "management") }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ if ne .Values.cluster.id "management" }}{{ .Values.cluster.id }}-{{ end }}longhorn
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-30"
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  project: {{ .Values.cluster.id }}
+  source:
+    repoURL: https://github.com/sudoceohq/argocd.git
+    targetRevision: main
+    helm:
+      releaseName: longhorn
+      valueFiles:
+      - "../../clusters/{{ .Values.cluster.id }}/cluster.yaml"
+    path: charts/longhorn
+  destination:
+    server: {{ .Values.cluster.server | quote }}
+    namespace: longhorn-system
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: disabled
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: privileged
+        pod-security.kubernetes.io/warn: privileged
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+{{- end }}

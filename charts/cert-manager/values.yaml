@@ -1,0 +1,17 @@
+---
+cert-manager:
+  crds:
+    enabled: true
+    keep: true
+  replicaCount: 2
+  enableCertificateOwnerRef: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 384Mi
+  webhook:
+    replicaCount: 2
+  cainjector:
+    replicaCount: 2

@@ -1,0 +1,46 @@
+---
+cert-manager-istio-csr:
+  replicaCount: 2
+  app:
+    certmanager:
+      namespace: istio-system
+      issuer:
+        name: vault-istio
+        kind: Issuer
+        group: cert-manager.io
+    tls:
+      trustDomain: mgmt.thriftystack.internal
+      rootCAFile: "/var/run/istio-csr/ca.pem"
+      certificateDuration: 1h
+      istiodCertificateDuration: 1h
+      istiodCertificateRenewBefore: 30m
+    server:
+      clusterID: management
+      maxCertificateDuration: 1h
+      caTrustedNodeAccounts: ''
+    controller:
+      configmapNamespaceSelector: thriftystack.io/mesh=enabled
+  volumes:
+  - name: root-ca
+    configMap:
+      name: istio-root-ca
+  volumeMounts:
+  - name: root-ca
+    mountPath: "/var/run/istio-csr"
+    readOnly: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 384Mi
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: cert-manager-istio-csr

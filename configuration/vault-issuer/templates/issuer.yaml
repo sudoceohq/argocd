@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-vault-auth
+  namespace: istio-system
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cert-manager-vault-token
+  namespace: istio-system
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - serviceaccounts/token
+  resourceNames:
+  - istio-vault-auth
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cert-manager-vault-token
+  namespace: istio-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cert-manager-vault-token
+subjects:
+- kind: ServiceAccount
+  name: cert-manager
+  namespace: cert-manager
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: vault-istio
+  namespace: istio-system
+spec:
+  vault:
+    server: {{ .Values.cluster.vaultAddress }}
+    path: {{ .Values.cluster.pkiMount }}/sign/istio
+    caBundleSecretRef:
+      name: vault-bootstrap-ca
+      key: ca.crt
+    auth:
+      kubernetes:
+        mountPath: "/v1/auth/{{ .Values.cluster.authMount }}"
+        role: {{ .Values.cluster.signerRole }}
+        serviceAccountRef:
+          name: istio-vault-auth
+          audiences:
+          - vault://istio-system/vault-istio

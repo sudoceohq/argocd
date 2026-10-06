@@ -1,0 +1,22 @@
+{{- if .Values.cluster.enabled }}
+{{- if or (not .Values.cluster.prepared) (empty .Values.cluster.server) (empty .Values.cluster.vaultAddress) }}
+{{- fail "An enabled cluster requires prepared=true, an explicit API destination and a reachable TLS Vault address" }}
+{{- end }}
+{{- range $stage, $previous := dict "istio" "certificates" "qualification" "istio" "enrollment" "qualification" }}
+{{- if and (index $.Values.stages $stage) (not (index $.Values.stages $previous)) }}
+{{- fail (printf "%s requires %s first" $stage $previous) }}
+{{- end }}
+{{- end }}
+{{- if and .Values.stages.enrollment (not .Values.stages.qualification) }}
+{{- fail "STRICT enrollment requires qualification first" }}
+{{- end }}
+{{- end }}
+{{- if not (has .Values.cluster.role (list "management" "workload")) }}
+{{- fail "cluster.role must be management or workload" }}
+{{- end }}
+{{- if not (regexMatch "^[a-z][a-z0-9-]*$" .Values.cluster.id) }}
+{{- fail "cluster.id must be a DNS-safe identifier" }}
+{{- end }}
+{{- if and .Values.cluster.enabled (not (hasPrefix "https://" .Values.cluster.server)) }}
+{{- fail "Enabled cluster destinations must use TLS" }}
+{{- end }}

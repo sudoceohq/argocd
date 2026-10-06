@@ -1,0 +1,60 @@
+---
+crossplane:
+  replicas: 2
+  leaderElection: true
+  provider:
+    packages: []
+  function:
+    packages: []
+  configuration:
+    packages: []
+  resourcesCrossplane:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  resourcesRBACManager:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  extraObjects:
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: crossplane
+      namespace: crossplane-system
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app: crossplane
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: crossplane-rbac-manager
+      namespace: crossplane-system
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app: crossplane-rbac-manager
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app: crossplane
+  rbacManager:
+    replicas: 2
+    leaderElection: true
+    topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: DoNotSchedule
+      labelSelector:
+        matchLabels:
+          app: crossplane-rbac-manager

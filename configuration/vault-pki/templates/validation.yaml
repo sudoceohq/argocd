@@ -1,0 +1,6 @@
+{{- if and .Values.cluster.manageRoot (ne .Values.cluster.id "management") }}
+{{- fail "Only the management PKI release may generate the shared root" }}
+{{- end }}
+{{- if and .Values.cluster.localReviewer (ne .Values.cluster.id "management") }}
+{{- fail "Remote auth cannot use management Vault's local TokenReview credentials" }}
+{{- end }}

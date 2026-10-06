@@ -1,0 +1,8 @@
+---
+apiVersion: v2
+name: thrifty-cert-manager-istio-csr
+version: 1.0.0
+dependencies:
+- name: cert-manager-istio-csr
+  version: v0.18.0
+  repository: https://charts.jetstack.io

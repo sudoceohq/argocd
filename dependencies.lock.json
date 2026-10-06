@@ -1,0 +1,110 @@
+{
+  "charts": [
+    {
+      "chart": "longhorn",
+      "version": "1.13.0",
+      "archive": "longhorn-1.13.0.tgz",
+      "url": "https://charts.longhorn.io/longhorn-1.13.0.tgz",
+      "sha256": "e57f010d2a8bcf0da5b8b03ffecf49c5bc35ddc2663588ce8f22b7567b6133ed"
+    },
+    {
+      "chart": "crossplane",
+      "version": "2.4.2",
+      "archive": "crossplane-2.4.2.tgz",
+      "url": "https://charts.crossplane.io/stable/crossplane-2.4.2.tgz",
+      "sha256": "e976358b6b135be6cfd72c08a47eb460b1a6399ef385b7c34835595339cd1fff"
+    },
+    {
+      "chart": "cert-manager-istio-csr",
+      "version": "v0.18.0",
+      "archive": "cert-manager-istio-csr-v0.18.0.tgz",
+      "url": "https://charts.jetstack.io/charts/cert-manager-istio-csr-v0.18.0.tgz",
+      "sha256": "98c3bac89e00cd97d9e192f41aec3b35168296c45ef8d4dd15669173ed99f1d5"
+    },
+    {
+      "chart": "base",
+      "version": "1.30.5",
+      "archive": "base-1.30.5.tgz",
+      "url": "https://istio-release.storage.googleapis.com/charts/base-1.30.5.tgz",
+      "sha256": "585a2eff20163239121c8eff3d48a2498b5af458418b1a2eee9f282846fca635"
+    },
+    {
+      "chart": "istiod",
+      "version": "1.30.5",
+      "archive": "istiod-1.30.5.tgz",
+      "url": "https://istio-release.storage.googleapis.com/charts/istiod-1.30.5.tgz",
+      "sha256": "c91d0f8c102a377795da2145eb23912dc648a3277c973b9cfd0049a4d76f096a"
+    },
+    {
+      "chart": "cert-manager",
+      "version": "v1.21.2",
+      "archive": "cert-manager-v1.21.2.tgz",
+      "url": "https://charts.jetstack.io/charts/cert-manager-v1.21.2.tgz",
+      "sha256": "73a56e1728edd6c99f1f31082618c3259d279a76b7ebd3d4bdc5475c2442d34a"
+    },
+    {
+      "chart": "vault",
+      "version": "0.34.1",
+      "archive": "vault-0.34.1.tgz",
+      "url": "https://helm.releases.hashicorp.com/vault-0.34.1.tgz",
+      "sha256": "df4c37fac32496892ff1e1d6fd7954d3a402cc7b1b2b4c2226af11b8a57564c4"
+    }
+  ],
+  "vaultProvider": {
+    "package": "xpkg.upbound.io/upbound/provider-vault@sha256:1ce13e69b66faf7cbf5f0f898d241e728ecf3e0ec7678f599eab581c17101e7e",
+    "schemaTag": "v4.0.2",
+    "schemas": [
+      {
+        "file": "vault.upbound.io_providerconfigs.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/vault.upbound.io_providerconfigs.yaml",
+        "sha256": "3a3ddc8cc472eff366298d086d119000a1ff73b156f9c9bdb5f982992388d58d"
+      },
+      {
+        "file": "vault.vault.upbound.io_mounts.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/vault.vault.upbound.io_mounts.yaml",
+        "sha256": "1fca241f1ab52de2ee075018f4ee941ea785b917a825606b47ee1271d425d6c3"
+      },
+      {
+        "file": "pki.vault.upbound.io_secretbackendrootcerts.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/pki.vault.upbound.io_secretbackendrootcerts.yaml",
+        "sha256": "443f7aeac983c136b553029fb9c335bb9aa5d17ebec8b59e729a3ea3067d2240"
+      },
+      {
+        "file": "pki.vault.upbound.io_secretbackendintermediatecertrequests.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/pki.vault.upbound.io_secretbackendintermediatecertrequests.yaml",
+        "sha256": "116c0342672625cfda74ae7cb25aeb70e421d72391148974d5a1abd08e4e2709"
+      },
+      {
+        "file": "kubernetes.vault.upbound.io_authbackendconfigs.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/kubernetes.vault.upbound.io_authbackendconfigs.yaml",
+        "sha256": "b2c0917b9acfc568b008c228f8a030bccd3f21f61fb21650d83ab64b8437b5fc"
+      },
+      {
+        "file": "vault.vault.upbound.io_policies.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/vault.vault.upbound.io_policies.yaml",
+        "sha256": "d21755fb6f286650ad4507b3c33292e622e8275b2fce27d1b30d22ca4b48a9ca"
+      },
+      {
+        "file": "kubernetes.vault.upbound.io_authbackendroles.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/kubernetes.vault.upbound.io_authbackendroles.yaml",
+        "sha256": "0145f9e255a8cf88b7ad3e1ae35cae7098f1539e2b77fe3238c5f78e1a876742"
+      },
+      {
+        "file": "pki.vault.upbound.io_secretbackendroles.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/pki.vault.upbound.io_secretbackendroles.yaml",
+        "sha256": "306ad70c3276195578020739ddbcf64c8f54f1a3c8054f1ea820be0a8380f3e4"
+      },
+      {
+        "file": "pki.vault.upbound.io_secretbackendrootsignintermediates.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/pki.vault.upbound.io_secretbackendrootsignintermediates.yaml",
+        "sha256": "beb6383e65b9049afe141ef0ce59521b61c76b47da055b17d9f33061726f693b"
+      },
+      {
+        "file": "pki.vault.upbound.io_secretbackendintermediatesetsigneds.yaml",
+        "url": "https://raw.githubusercontent.com/upbound/provider-vault/v4.0.2/package/crds/pki.vault.upbound.io_secretbackendintermediatesetsigneds.yaml",
+        "sha256": "184734d9484dbe124e218ad44e2f0412baeb22a4bdb47d184737361b3194483e"
+      }
+    ],
+    "packageTag": "xpkg.upbound.io/upbound/provider-vault:v4.0.2"
+  }
+}

@@ -1,0 +1,4 @@
+---
+apiVersion: v2
+name: thrifty-mesh-prerequisites
+version: 1.0.0

@@ -1,0 +1,28 @@
+---
+longhorn:
+  persistence:
+    defaultClass: true
+    defaultClassReplicaCount: 3
+    reclaimPolicy: Retain
+  defaultSettings:
+    defaultDataPath: "/var/mnt/longhorn"
+    defaultReplicaCount: 3
+    replicaSoftAntiAffinity: false
+    replicaZoneSoftAntiAffinity: true
+    storageMinimalAvailablePercentage: 25
+    storageReservedPercentageForDefaultDisk: 20
+    storageOverProvisioningPercentage: 100
+    allowVolumeCreationWithDegradedAvailability: false
+    concurrentReplicaRebuildPerNodeLimit: 1
+    backupTarget: ''
+    backupTargetCredentialSecret: ''
+  csi:
+    attacherReplicaCount: 3
+    provisionerReplicaCount: 3
+    resizerReplicaCount: 3
+    snapshotterReplicaCount: 3
+  longhornUI:
+    replicas: 2
+  service:
+    ui:
+      type: ClusterIP

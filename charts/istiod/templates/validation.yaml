@@ -1,0 +1,8 @@
+{{- if .Values.cluster }}
+{{- if ne (index .Values "istiod" "meshConfig" "trustDomain") .Values.cluster.trustDomain }}
+{{- fail "Signer and Istio identity values must match cluster ID and trust domain" }}
+{{- end }}
+{{- if ne (index .Values "istiod" "global" "multiCluster" "clusterName") .Values.cluster.id }}
+{{- fail "Signer and Istio identity values must match cluster ID and trust domain" }}
+{{- end }}
+{{- end }}

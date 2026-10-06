@@ -1,0 +1,48 @@
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: vault-provider
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-vault
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          containers:
+          - name: package-runtime
+            resources:
+              requests:
+                cpu: 50m
+                memory: 256Mi
+              limits:
+                memory: 768Mi
+            env:
+            - name: VAULT_CACERT
+              value: "/etc/vault-tls/ca.crt"
+            volumeMounts:
+            - name: vault-bootstrap-ca
+              mountPath: "/etc/vault-tls"
+              readOnly: true
+          volumes:
+          - name: vault-bootstrap-ca
+            configMap:
+              name: vault-bootstrap-ca
+              optional: true
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-vault
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    thriftystack.io/package-version: v4.0.2
+spec:
+  package: xpkg.upbound.io/upbound/provider-vault@sha256:1ce13e69b66faf7cbf5f0f898d241e728ecf3e0ec7678f599eab581c17101e7e
+  revisionActivationPolicy: Automatic
+  revisionHistoryLimit: 1
+  runtimeConfigRef:
+    name: vault-provider

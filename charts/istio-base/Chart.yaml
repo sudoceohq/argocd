@@ -1,0 +1,8 @@
+---
+apiVersion: v2
+name: thrifty-istio-base
+version: 1.0.0
+dependencies:
+- name: base
+  version: 1.30.5
+  repository: https://istio-release.storage.googleapis.com/charts

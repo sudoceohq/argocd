@@ -1,0 +1,8 @@
+{{- if .Values.cluster }}
+{{- if ne (index .Values "cert-manager-istio-csr" "app" "tls" "trustDomain") .Values.cluster.trustDomain }}
+{{- fail "Signer and Istio identity values must match cluster ID and trust domain" }}
+{{- end }}
+{{- if ne (index .Values "cert-manager-istio-csr" "app" "server" "clusterID") .Values.cluster.id }}
+{{- fail "Signer and Istio identity values must match cluster ID and trust domain" }}
+{{- end }}
+{{- end }}

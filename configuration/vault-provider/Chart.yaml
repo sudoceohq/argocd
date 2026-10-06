@@ -1,0 +1,4 @@
+---
+apiVersion: v2
+name: thrifty-vault-provider
+version: 1.0.0

@@ -1,0 +1,40 @@
+{{- if and .Values.cluster.enabled .Values.stages.istio }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ if ne .Values.cluster.id "management" }}{{ .Values.cluster.id }}-{{ end }}istiod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '60'
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  project: {{ .Values.cluster.id }}
+  source:
+    repoURL: https://github.com/sudoceohq/argocd.git
+    targetRevision: main
+    helm:
+      releaseName: istiod
+      valueFiles:
+      - "../../clusters/{{ .Values.cluster.id }}/cluster.yaml"
+      - ../../clusters/{{ .Values.cluster.id }}/istiod.yaml
+    path: charts/istiod
+  destination:
+    server: {{ .Values.cluster.server | quote }}
+    namespace: istio-system
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+    managedNamespaceMetadata:
+      labels:
+        istio-injection: disabled
+{{- end }}

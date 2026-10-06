@@ -1,0 +1,32 @@
+{{- if and .Values.cluster.enabled (eq .Values.cluster.role "management") .Values.stages.pki }}
+{{- range .Values.pkiClusters }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ . }}-vault-pki
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: '11'
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  project: management
+  source:
+    repoURL: https://github.com/sudoceohq/argocd.git
+    targetRevision: main
+    path: configuration/vault-pki
+    helm:
+      releaseName: {{ . }}-vault-pki
+      valueFiles:
+        - ../../clusters/{{ . }}/cluster.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: crossplane-system
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
+{{- end }}
+{{- end }}

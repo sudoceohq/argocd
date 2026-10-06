@@ -1,0 +1,4 @@
+---
+apiVersion: v2
+name: thrifty-vault-pki
+version: 1.0.0

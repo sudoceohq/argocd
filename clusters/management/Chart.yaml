@@ -1,0 +1,5 @@
+---
+apiVersion: v2
+name: thrifty-cluster-apps
+version: 1.0.0
+description: Explicitly staged, cluster-scoped Argo CD Helm applications

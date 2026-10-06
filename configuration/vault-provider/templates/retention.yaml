@@ -1,0 +1,39 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: workload-pki-retention
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ['pki.vault.upbound.io']
+        apiVersions: ['*']
+        operations: [DELETE]
+        resources: [secretbackendrootcerts, secretbackendintermediatecertrequests, secretbackendrootsignintermediates, secretbackendintermediatesetsigneds]
+      - apiGroups: ['vault.vault.upbound.io']
+        apiVersions: ['*']
+        operations: [DELETE]
+        resources: [mounts]
+      - apiGroups: ['']
+        apiVersions: [v1]
+        operations: [DELETE]
+        resources: [persistentvolumeclaims, persistentvolumes, namespaces]
+  validations:
+    - expression: >-
+        !((request.resource.group == 'pki.vault.upbound.io' &&
+           oldObject.metadata.name in {{ .Values.protectedCaNames | toJson }}) ||
+          (request.resource.group == 'vault.vault.upbound.io' &&
+           oldObject.metadata.name in {{ .Values.protectedMountNames | toJson }}) ||
+          (request.resource.resource == 'persistentvolumeclaims' && request.namespace == 'vault') ||
+          (request.resource.resource == 'persistentvolumes' && has(oldObject.spec.claimRef) &&
+           oldObject.spec.claimRef.namespace == 'vault') ||
+          (request.resource.resource == 'namespaces' && oldObject.metadata.name in ['vault', 'longhorn-system']))
+      message: 'Protected workload CA, PKI mount or Vault storage. Follow the reviewed recovery/decommission procedure before disabling this binding.'
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: workload-pki-retention
+spec:
+  policyName: workload-pki-retention
+  validationActions: [Deny]

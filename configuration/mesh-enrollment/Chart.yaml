@@ -1,0 +1,4 @@
+---
+apiVersion: v2
+name: thrifty-mesh-enrollment
+version: 1.0.0
